@@ -134,3 +134,70 @@ print(df[df["Marks"] > 80])
 # c. Names starting with N
 print("\nNames Starting with N:")
 print(df[df["Name"].str.startswith("N")])
+
+
+import tensorflow as tf
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+
+# Load dataset
+digits = load_digits()
+
+X = digits.images
+y = digits.target
+
+# Normalize images
+X = X / 16.0
+
+# Reshape images for CNN
+X = X.reshape(-1, 8, 8, 1)
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Display sample images
+plt.figure(figsize=(10, 5))
+
+for i in range(10):
+    plt.subplot(2, 5, i + 1)
+    plt.imshow(digits.images[i], cmap='gray')
+    plt.title(y[i])
+    plt.axis('off')
+
+plt.show()
+
+# Create CNN model
+model = tf.keras.Sequential([
+    tf.keras.layers.Conv2D(
+        32, (3, 3),
+        activation='relu',
+        input_shape=(8, 8, 1)
+    ),
+
+    tf.keras.layers.MaxPooling2D((2, 2)),
+
+    tf.keras.layers.Flatten(),
+
+    tf.keras.layers.Dense(64, activation='relu'),
+
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+# Compile model
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Train model
+model.fit(X_train, y_train, epochs=10)
+
+# Test model
+loss, accuracy = model.evaluate(X_test, y_test)
+
+print("Test Accuracy:", accuracy * 100, "%")
